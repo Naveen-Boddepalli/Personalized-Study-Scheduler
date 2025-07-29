@@ -1,39 +1,52 @@
-/* Front-end controller */
-const form = document.getElementById('planForm');
+/* Front-end only — no server needed */
+const form   = document.getElementById('planForm');
 const output = document.getElementById('output');
 
-form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    output.innerHTML = "<p>Generating… ⏳</p>";
+form.addEventListener('submit', e => {
+  e.preventDefault();
+  output.textContent = 'Generating… ⏳';
 
-    const payload = {
-        subjects: e.target.subjects.value,
-        hoursPerDay: +e.target.hoursPerDay.value,
-        days: +e.target.days.value
-    };
+  // 1. read and sanitise input
+  const subjects = form.subjects.value
+                    .split(',')
+                    .map(s => s.trim())
+                    .filter(Boolean);
+  const hoursDay = +form.hoursPerDay.value;
+  const days     = +form.days.value;
 
-    try {
-        const res = await fetch('/schedule', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        renderSchedule(data);
-    } catch (err) {
-        output.innerHTML = `<p style="color:#f66;">Error: ${err}</p>`;
-    }
-});
+  if (!subjects.length || hoursDay <= 0 || days <= 0) {
+    output.textContent = '❌ Invalid input';
+    return;
+  }
 
-function renderSchedule({ plan }) {
-    /* plan: [{day:1, subject:"DSA", hours:2}, …] */
-    output.innerHTML = '';
-    plan.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'schedule-card';
-        card.innerHTML = `
-        <span><strong>Day ${item.day}</strong> — ${item.subject}</span>
-        <span>${item.hours} h</span>`;
-        output.appendChild(card);
+  // 2. compute schedule (same logic as C++ back-end)
+  const pq = subjects.map(s => ({priority: 0, subject: s}));
+  const plan = [];
+
+  for (let d = 1; d <= days; ++d) {
+    // pop subject with lowest priority
+    pq.sort((a, b) => a.priority - b.priority);
+    const best = pq.shift();
+
+    plan.push({
+      day: d,
+      subject: best.subject,
+      hours: +(hoursDay / subjects.length).toFixed(2)
     });
-}
+
+    // re-enqueue with higher priority (spaced by +2)
+    pq.push({priority: best.priority + 2, subject: best.subject});
+  }
+
+  // 3. render result
+  output.innerHTML = '';
+  plan.forEach(({day, subject, hours}) => {
+    const card = document.createElement('div');
+    card.className = 'schedule-card';
+    card.innerHTML = `
+      <strong>Day ${day}</strong>
+      <span>${subject}</span>
+      <em>${hours} h</em>`;
+    output.appendChild(card);
+  });
+});
