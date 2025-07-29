@@ -1,41 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8" />
-    <title>Personalised Study Scheduler</title>
-    <link rel="stylesheet" href="styles.css" />
+  <meta charset="utf-8"/>
+  <title>Study-Planner</title>
+  <link rel="stylesheet" href="styles.css"/>
 </head>
-
 <body>
-    <header>
-        <h1>📚 Personalised Study Scheduler</h1>
-    </header>
+  <header><h1>Personal Study-Planner</h1></header>
 
-    <main>
-        <form id="planForm">
-            <label>
-                Subjects (comma-separated)
-                <input type="text" name="subjects" placeholder="DSA, Maths, OS" required />
-            </label>
+  <main>
+    <form id="planForm">
+      <label>
+        Subjects (comma-separated)
+        <input name="subjects" required/>
+      </label>
 
-            <label>
-                Total study hours per day
-                <input type="number" name="hoursPerDay" min="1" max="12" required />
-            </label>
+      <label>
+        Hours per day
+        <input name="hoursPerDay" type="number" min="1" step="0.5" required/>
+      </label>
 
-            <label>
-                Schedule length (days)
-                <input type="number" name="days" min="1" max="365" required />
-            </label>
+      <label>
+        Number of days
+        <input name="days" type="number" min="1" required/>
+      </label>
 
-            <button class="pulse" type="submit">Generate Plan</button>
-        </form>
+      <button class="pulse">Generate plan</button>
+    </form>
 
-        <section id="output"></section>
-    </main>
+    <section id="output"></section>
+  </main>
 
-    <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
-
 </html>
